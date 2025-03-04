@@ -1,0 +1,132 @@
+Here is a SQL Server database schema with properly structured tables and constraints for your insurance management system.
+
+CREATE DATABASE InsuranceDB;
+GO
+
+USE InsuranceDB;
+GO
+
+-- Table to store user information
+CREATE TABLE Users (
+    UserID INT IDENTITY(1,1) PRIMARY KEY,
+    FullName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) UNIQUE NOT NULL,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    PhoneNumber NVARCHAR(20) UNIQUE,
+    Address NVARCHAR(255),
+    DateOfBirth DATE,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Table to store different types of insurance policies
+CREATE TABLE InsuranceTypes (
+    InsuranceTypeID INT IDENTITY(1,1) PRIMARY KEY,
+    InsuranceName NVARCHAR(50) UNIQUE NOT NULL,
+    Description NVARCHAR(255) NOT NULL
+);
+GO
+
+-- Insert predefined insurance types
+INSERT INTO InsuranceTypes (InsuranceName, Description) VALUES
+('Life Insurance', 'Provides financial coverage for the insured and family in case of mishaps'),
+('Medical Insurance', 'Covers medical expenses due to illness or accidents'),
+('Motor Insurance', 'Protects against damages to owned automobiles'),
+('Home Insurance', 'Compensates for mishaps occurring in a home');
+GO
+
+-- Table to store different policy plans
+CREATE TABLE Policies (
+    PolicyID INT IDENTITY(1,1) PRIMARY KEY,
+    InsuranceTypeID INT FOREIGN KEY REFERENCES InsuranceTypes(InsuranceTypeID) ON DELETE CASCADE,
+    PolicyName NVARCHAR(100) NOT NULL,
+    PremiumAmount DECIMAL(10,2) NOT NULL,
+    TermYears INT NOT NULL,
+    SumAssured DECIMAL(15,2) NOT NULL,
+    Description NVARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Table for storing user policies (user purchases a policy)
+CREATE TABLE UserPolicies (
+    UserPolicyID INT IDENTITY(1,1) PRIMARY KEY,
+    UserID INT FOREIGN KEY REFERENCES Users(UserID) ON DELETE CASCADE,
+    PolicyID INT FOREIGN KEY REFERENCES Policies(PolicyID) ON DELETE CASCADE,
+    StartDate DATE NOT NULL,
+    EndDate DATE NOT NULL,
+    PaymentStatus NVARCHAR(50) CHECK (PaymentStatus IN ('Pending', 'Paid', 'Cancelled')),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Table to store policy premium payments
+CREATE TABLE Payments (
+    PaymentID INT IDENTITY(1,1) PRIMARY KEY,
+    UserPolicyID INT FOREIGN KEY REFERENCES UserPolicies(UserPolicyID) ON DELETE CASCADE,
+    PaymentDate DATETIME DEFAULT GETDATE(),
+    AmountPaid DECIMAL(10,2) NOT NULL,
+    PaymentMethod NVARCHAR(50) CHECK (PaymentMethod IN ('Credit Card', 'Debit Card', 'Net Banking', 'UPI', 'Cash'))
+);
+GO
+
+-- Table to store claims made by users
+CREATE TABLE Claims (
+    ClaimID INT IDENTITY(1,1) PRIMARY KEY,
+    UserPolicyID INT FOREIGN KEY REFERENCES UserPolicies(UserPolicyID) ON DELETE CASCADE,
+    ClaimDate DATETIME DEFAULT GETDATE(),
+    ClaimAmount DECIMAL(15,2) NOT NULL,
+    ClaimStatus NVARCHAR(50) CHECK (ClaimStatus IN ('Pending', 'Approved', 'Rejected')),
+    Description NVARCHAR(255) NOT NULL
+);
+GO
+
+-- Table for loan facilities for policyholders
+CREATE TABLE Loans (
+    LoanID INT IDENTITY(1,1) PRIMARY KEY,
+    UserPolicyID INT FOREIGN KEY REFERENCES UserPolicies(UserPolicyID) ON DELETE CASCADE,
+    LoanAmount DECIMAL(15,2) NOT NULL,
+    InterestRate DECIMAL(5,2) NOT NULL,
+    TenureMonths INT NOT NULL,
+    LoanStatus NVARCHAR(50) CHECK (LoanStatus IN ('Pending', 'Approved', 'Rejected')),
+    AppliedDate DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Table to store company announcements or strategies
+CREATE TABLE Announcements (
+    AnnouncementID INT IDENTITY(1,1) PRIMARY KEY,
+    Title NVARCHAR(255) NOT NULL,
+    Details NVARCHAR(MAX) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+Explanation:
+
+1. Users - Stores user details.
+
+
+2. InsuranceTypes - Stores predefined insurance types (Life, Medical, Motor, Home).
+
+
+3. Policies - Stores different policy plans under each insurance type.
+
+
+4. UserPolicies - Tracks which users have subscribed to which policies.
+
+
+5. Payments - Tracks premium payments by users.
+
+
+6. Claims - Handles insurance claims made by users.
+
+
+7. Loans - Provides loan facilities for policyholders.
+
+
+8. Announcements - Stores company updates and new strategies.
+
+
+
+This structure ensures data integrity and supports the necessary functionalities. Let me know if you need any modifications!
